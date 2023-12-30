@@ -38,13 +38,16 @@
 
 - `pjsk`：查看这个插件的帮助信息，了解如何使用它。
 
-- `pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] [inputText:text]`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
+- `pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] -w [weight:number] -h [height:number] --color [color:string] [inputText:text]`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
   - `number` 是你想要使用的表情包的 ID，你可以使用 `pjsk.drawList` 命令来查看所有可用的表情包 ID，默认值是 49。
   - `positionY` 是文本的垂直位置，可以是正数或负数，越大越靠下，默认值是 0。
   - `positionX` 是文本的水平位置，可以是正数或负数，越大越靠右，默认值是 0。
   - `rotate` 是文本的旋转角度，可以是正数或负数，越大越顺时针旋转，默认值是 0。
   - `fontSize` 是文本字体的大小，可以是正数或负数，越大字体越大，默认值是 0。
   - `curve` 是是否启用文本曲线效果，可以是 true 或 false，默认值是 false。
+  - `weight` 是画布尺寸的宽度，可以是正数或负数，越大字体越大，默认值是 296。
+  - `height` 是画布尺寸的高度，可以是正数或负数，越大字体越大，默认值是 256。
+  - `color` 是文本字体的颜色，是颜色字符串，例如"#F09A04"，默认值是 ''。
   - `inputText` 是你想要显示在表情包上的文本内容，你可以使用斜杠（/）来换行。
   - 例如，你可以输入这样的命令：
 

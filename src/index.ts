@@ -19,13 +19,16 @@ export const usage = `## 🎮 使用
 
 - \`pjsk\`：查看这个插件的帮助信息，了解如何使用它。
 
-- \`pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] [inputText:text]\`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
+- \`pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] -w [weight:number] -h [height:number] --color [color:string] [inputText:text]\`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
   - \`number\` 是你想要使用的表情包的 ID，你可以使用 \`pjsk.drawList\` 命令来查看所有可用的表情包 ID，默认值是 49。
   - \`positionY\` 是文本的垂直位置，可以是正数或负数，越大越靠下，默认值是 0。
   - \`positionX\` 是文本的水平位置，可以是正数或负数，越大越靠右，默认值是 0。
   - \`rotate\` 是文本的旋转角度，可以是正数或负数，越大越顺时针旋转，默认值是 0。
   - \`fontSize\` 是文本字体的大小，可以是正数或负数，越大字体越大，默认值是 0。
   - \`curve\` 是是否启用文本曲线效果，可以是 true 或 false，默认值是 false。
+  - \`weight\` 是画布尺寸的宽度，可以是正数或负数，越大字体越大，默认值是 296。
+  - \`height\` 是画布尺寸的高度，可以是正数或负数，越大字体越大，默认值是 256。
+  - \`color\` 是文本字体的颜色，是颜色字符串，例如"#F09A04"，默认值是 ''。
   - \`inputText\` 是你想要显示在表情包上的文本内容，你可以使用斜杠（/）来换行。
   - 例如，你可以输入这样的命令：
 
@@ -64,8 +67,9 @@ export function apply(ctx: Context) {
     .option('rotate', '-r [rotate:number] 文本的旋转角度', { fallback: 0 })
     .option('fontSize', '-s [fontSize:number] 文本字体的大小', { fallback: 0 })
     .option('curve', '-c [curve:boolean] 是否启用文本曲线', { fallback: false })
-    .option('width', '-w [width:number] 画布的宽度', { fallback: 0 })
-    .option('height', '-h [height:number] 画布的高度', { fallback: 0 })
+    .option('width', '-w [width:number] 画布的宽度', { fallback: 296 })
+    .option('height', '-h [height:number] 画布的高度', { fallback: 256 })
+    .option('color', '--color [color:string] 文本的颜色', { fallback: '' }) // 新增 color 选项
     .action(async ({ session, options }, inputText) => {
       const {
         number = 49,
@@ -74,8 +78,9 @@ export function apply(ctx: Context) {
         rotate = 0,
         fontSize = 0,
         curve = false,
-        width: customWidth = 0,
-        height: customHeight = 0,
+        width: customWidth = 296,
+        height: customHeight = 256,
+        color = '', // 获取 color 选项的值
       } = options;
 
       const draw = async () => {
@@ -112,7 +117,8 @@ export function apply(ctx: Context) {
         ctx.rotate(adjustedRotate / 10);
         ctx.textAlign = 'center';
         ctx.strokeStyle = 'white';
-        ctx.fillStyle = characterData.color;
+        ctx.fillStyle = isValidColor(color) ? color : characterData.color; // 判断颜色有效性并设置文本颜色
+
         const lines = text.split('/');
 
         if (curve) {
@@ -142,6 +148,12 @@ export function apply(ctx: Context) {
 
       await draw();
     });
+
+  // 验证颜色有效性的函数
+  function isValidColor(color) {
+    const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    return colorRegex.test(color);
+  }
 
   ctx.command('pjsk.drawList', '绘制列表').action(async ({ session }) => {
     const drawList = async () => {
