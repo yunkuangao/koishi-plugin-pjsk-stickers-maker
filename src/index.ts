@@ -42,8 +42,6 @@ export const Config: Schema<Config> = Schema.object({});
 const width = 296
 const height = 256
 
-
-
 export function apply(ctx: Context) {
 
   // 注册字体
@@ -56,50 +54,60 @@ export function apply(ctx: Context) {
     })
 
   // 定义一个命令“pjsk”，接受一个名为“inputText”的文本参数，用于绘制图像
+  const width = 296
+  const height = 256
+
   ctx.command('pjsk.draw [inputText:text]', '绘制')
-    // 定义命令的选项
     .option('number', '-n [number:number] 表情包ID', { fallback: 49 })
     .option('positionY', '-y [positionY:number] 文本的垂直位置', { fallback: 0 })
     .option('positionX', '-x [positionX:number] 文本的水平位置', { fallback: 0 })
     .option('rotate', '-r [rotate:number] 文本的旋转角度', { fallback: 0 })
     .option('fontSize', '-s [fontSize:number] 文本字体的大小', { fallback: 0 })
     .option('curve', '-c [curve:boolean] 是否启用文本曲线', { fallback: false })
+    .option('width', '-w [width:number] 画布的宽度', { fallback: 0 })
+    .option('height', '-h [height:number] 画布的高度', { fallback: 0 })
     .action(async ({ session, options }, inputText) => {
-      // 从options中解构出需要的变量，如果不存在就用默认值
-      const { number = 49, positionY = 0, positionX = 0, rotate = 0, fontSize = 0, curve = false } = options;
+      const {
+        number = 49,
+        positionY = 0,
+        positionX = 0,
+        rotate = 0,
+        fontSize = 0,
+        curve = false,
+        width: customWidth = 0,
+        height: customHeight = 0,
+      } = options;
+
       const draw = async () => {
         // 创建画布
-        const canvas = createCanvas(width, height);
+        const canvasWidth = customWidth || width;
+        const canvasHeight = customHeight || height;
+        const canvas = createCanvas(canvasWidth, canvasHeight);
         const ctx = canvas.getContext('2d');
 
         const character = number;
         const characterData = characters[character];
         const { defaultText } = characterData;
-        var { text, s, x, y, r } = defaultText;
+        let { text, s, x, y, r } = defaultText;
 
-        // 如果存在输入文本，则使用输入文本替换默认文本中的斜杠（/）
         if (inputText) {
           text = inputText.replace(/\//g, '\n');
         }
 
         const img = await loadImage(`./pjsk/img/${characterData.img}`);
 
-        // 清除画布并绘制背景图像
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasWidth, canvasHeight);
 
-        // 根据默认值和画布大小进行调整，调整绘制选项
-        const adjustedFontSize = Math.max(1, Math.min(canvas.height, s + 12 + Number(fontSize)));
-        const adjustedPositionX = curve ? x + Number(positionX) : Math.max(0, Math.min(canvas.width, x + Number(positionX)));
-        const adjustedPositionY = curve ? y + Number(positionY) : Math.max(0, Math.min(canvas.height, y + Number(positionY)));
+        const adjustedFontSize = Math.max(1, Math.min(canvasHeight, s + 12 + Number(fontSize)));
+        const adjustedPositionX = curve ? x + Number(positionX) : Math.max(0, Math.min(canvasWidth, x + Number(positionX)));
+        const adjustedPositionY = curve ? y + Number(positionY) : Math.max(0, Math.min(canvasHeight, y + Number(positionY)));
         const adjustedRotate = r + Number(rotate);
 
-        // 设置字体样式和线宽
         ctx.font = `${adjustedFontSize}px 'FOT-Yuruka Std UB', '上首方糖体'`;
         ctx.lineWidth = 9;
         ctx.save();
 
-        // 根据位置进行平移和旋转
         ctx.translate(adjustedPositionX, adjustedPositionY);
         ctx.rotate(adjustedRotate / 10);
         ctx.textAlign = 'center';
@@ -107,7 +115,6 @@ export function apply(ctx: Context) {
         ctx.fillStyle = characterData.color;
         const lines = text.split('/');
 
-        // 如果启用曲线选项，则绘制曲线文本
         if (curve) {
           let angle = (Math.PI * text.length) / 7;
           for (let line of lines) {
@@ -121,7 +128,6 @@ export function apply(ctx: Context) {
             }
           }
         } else {
-          // 否则，绘制普通文本
           let y = 0;
           for (let line of lines) {
             ctx.strokeText(line, 0, y);
@@ -130,11 +136,7 @@ export function apply(ctx: Context) {
           }
         }
 
-        // 将画布转换为图像缓冲区，并将其写入文件
         const buffer = canvas.toBuffer('image/png');
-        // const filePath = 'output.png';
-        // fs.writeFileSync(filePath, buffer);
-        // 将图像发送给会话
         await session.send(h.image(buffer, 'image/png'));
       };
 
