@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pjsk-stickers-maker",
-  "description": "",
-  "version": "0.0.1",
+  "description": "[pjsk](https://st.ayaka.one/) 表情包生成器。",
+  "version": "0.0.2",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,13 +9,29 @@
     "dist"
   ],
   "license": "MIT",
+  "author": "Nawyjx <3373167460@qq.com>",
+  "homepage": "https://www.npmjs.com/package/koishi-plugin-pjsk-stickers-maker?activeTab=readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/araea/koishi-plugin-pjsk-stickers-maker.git"
+  },
   "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
-    "plugin"
+    "plugin",
+    "pjsk",
+    "表情包",
+    "Project Sekai Stickers",
+    "啤酒烧烤",
+    "初音未来",
+    "生成器",
+    "Stickers"
   ],
   "peerDependencies": {
-    "koishi": "4.15.6"
+    "koishi": "^4.16.2"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
   }
 }
