@@ -24,7 +24,7 @@
 
 ## 🎮 使用
 
-- 点击这里 [下载“pjsk”压缩包](https://media-zjhz-fy-person.zj6oss.ctyunxs.cn/PERSONCLOUD/9275a5ed-87eb-4670-926b-17b32bdef2a3.zip?x-amz-CLIENTTYPEIN=UNKNOWN&AWSAccessKeyId=0Lg7dAq3ZfHvePP8DKEU&x-amz-userLevel=0&x-amz-limitrate=51200&x-amz-UID=746515155&x-amz-APPID=828221&response-content-disposition=attachment%3Bfilename%3D%22pjsk.zip%22%3Bfilename*%3DUTF-8%27%27pjsk.zip&x-amz-CLIENTNETWORK=UNKNOWN&x-amz-CLOUDTYPEIN=PERSON&Signature=KnRg27f3Jm/j4axr544EiuU5EB0%3D&Expires=1703923768&x-amz-FSIZE=27723739&x-amz-UFID=625111108844482999)。
+- 下载 `pjsk` 压缩包：[天翼网盘（访问码：dg8t）](https://cloud.189.cn/web/share?code=2yIZjeYbi6v2) [蓝奏云](https://wwsy.lanzouj.com/ibOxp1je4uva) [115网盘（访问码：x2f0）](https://115.com/s/swzz2t63fn6?password=x2f0&#) 或者 在命令行内输入 `git clone https://github.com/araea/koishi-plugin-pjsk-stickers-maker` 得到 `pjsk` 文件。
 - 在 `Koishi` 默认根目录下新建文件夹 `pjsk`。
 - 将压缩包里的 `fonts` 和 `img` 文件夹放到 `pjsk` 文件夹内。
 - 进入 `fonts` 文件夹，手动将两个 ttf 字体安装。
