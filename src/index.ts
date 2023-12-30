@@ -9,7 +9,6 @@ export const usage = `## 🎮 使用
   - [蓝奏云](https://wwsy.lanzouj.com/ibOxp1je4uva)
   - [115网盘（访问码：x2f0）](https://115.com/s/swzz2t63fn6?password=x2f0&#) 
   - [天翼网盘（访问码：dg8t）](https://cloud.189.cn/web/share?code=2yIZjeYbi6v2)
-  - 或者在命令行终端内输入 \`git clone https://github.com/araea/koishi-plugin-pjsk-stickers-maker\` 得到 \`pjsk\` 文件夹。
 - 在 \`Koishi\` 默认根目录下新建文件夹 \`pjsk\`。
 - 将压缩包里的 \`fonts\` 和 \`img\` 文件夹放到 \`pjsk\` 文件夹内。
 - 进入 \`fonts\` 文件夹，手动将两个 ttf 字体安装。
@@ -153,7 +152,7 @@ export function apply(ctx: Context) {
       }
       const imageSize = 100;
       const padding = 10;
-      const maxImagesPerRow = 5; // 每行最多绘制5个图像对象
+      const maxImagesPerRow = 12; // 每行最多绘制 12 个图像对象
       const imagesPerRow = Math.min(maxImagesPerRow, characters.length);
       const rowCount = Math.ceil(characters.length / imagesPerRow);
       const canvasHeight = rowCount * (imageSize + padding) - padding;
