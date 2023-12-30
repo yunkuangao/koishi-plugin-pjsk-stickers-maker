@@ -43,11 +43,13 @@ export const Config: Schema<Config> = Schema.object({});
 const width = 296
 const height = 256
 
-// 注册字体
-registerFont('./pjsk/fonts/FOT-Yuruka Std.otf', { family: 'FOT-Yuruka Std UB' });
-registerFont('./pjsk/fonts/ShangShouFangTangTi-2.ttf', { family: '上首方糖体' });
+
 
 export function apply(ctx: Context) {
+
+  // 注册字体
+  registerFont('./pjsk/fonts/FOT-Yuruka Std.otf', { family: 'FOT-Yuruka Std UB' });
+  registerFont('./pjsk/fonts/ShangShouFangTangTi-2.ttf', { family: '上首方糖体' });
 
   ctx.command('pjsk', '查看pjsk表情包生成帮助')
     .action(async ({ session }) => {
