@@ -48,7 +48,7 @@ export function apply(ctx: Context) {
   // 将资源文件存到data目录下
   fs.cp(dependencyPjskDir,
     pluginDataDir,
-    {recursive: true},
+    {recursive: true, force: false},
     (err) => {
       if (err) {
         logger.error('复制pjsk文件夹出错:' + err.message)
