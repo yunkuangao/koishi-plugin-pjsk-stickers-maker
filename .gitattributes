@@ -5,3 +5,9 @@
 *.ico -text
 *.gif -text
 *.webp -text
+
+# 字体文件
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
