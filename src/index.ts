@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 export const name = 'pjsk-stickers-maker'
+//language=markdown
 export const usage = `## 🎮 使用
 
 - 下载 \`pjsk\` 压缩包
