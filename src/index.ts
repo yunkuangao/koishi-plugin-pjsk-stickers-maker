@@ -7,14 +7,6 @@ export const name = 'pjsk-stickers-maker'
 //language=markdown
 export const usage = `## 🎮 使用
 
-- 下载 \`pjsk\` 压缩包
-  - [蓝奏云](https://wwsy.lanzouj.com/ibOxp1je4uva)
-  - [115网盘（访问码：x2f0）](https://115.com/s/swzz2t63fn6?password=x2f0&#)
-  - [天翼网盘（访问码：dg8t）](https://cloud.189.cn/web/share?code=2yIZjeYbi6v2)
-  - 或者在命令行终端内输入 \`git clone https://github.com/araea/koishi-plugin-pjsk-stickers-maker\` 得到 \`pjsk\` 文件夹。
-- 在 \`Koishi\` 默认根目录下新建文件夹 \`pjsk\`。
-- 将压缩包里的 \`fonts\` 和 \`img\` 文件夹放到 \`pjsk\` 文件夹内。
-- 进入 \`fonts\` 文件夹，手动将两个 ttf 字体安装。
 - 启动插件，使用 \`pjsk.drawList\` 指令生成表情包 ID 列表。
 - 建议为指令添加合适的别名。
 
@@ -22,13 +14,16 @@ export const usage = `## 🎮 使用
 
 - \`pjsk\`：查看这个插件的帮助信息，了解如何使用它。
 
-- \`pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] [inputText:text]\`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
+- \`pjsk.draw -n [number:number] -y [positionY:number] -x [positionX:number] -r [rotate:number] -s [fontSize:number] -c [curve:boolean] -w [weight:number] -h [height:number] --color [color:string] [inputText:text]\`：生成表情包图片，你需要指定一个文本参数，以及一些可选的选项参数（请将选项放在文本参数前面）。
   - \`number\` 是你想要使用的表情包的 ID，你可以使用 \`pjsk.drawList\` 命令来查看所有可用的表情包 ID，默认值是 49。
   - \`positionY\` 是文本的垂直位置，可以是正数或负数，越大越靠下，默认值是 0。
   - \`positionX\` 是文本的水平位置，可以是正数或负数，越大越靠右，默认值是 0。
   - \`rotate\` 是文本的旋转角度，可以是正数或负数，越大越顺时针旋转，默认值是 0。
   - \`fontSize\` 是文本字体的大小，可以是正数或负数，越大字体越大，默认值是 0。
   - \`curve\` 是是否启用文本曲线效果，可以是 true 或 false，默认值是 false。
+  - \`weight\` 是画布尺寸的宽度，可以是正数或负数，越大字体越大，默认值是 296。
+  - \`height\` 是画布尺寸的高度，可以是正数或负数，越大字体越大，默认值是 256。
+  - \`color\` 是文本字体的颜色，是颜色字符串，例如"#F09A04"，默认值是 ''。
   - \`inputText\` 是你想要显示在表情包上的文本内容，你可以使用斜杠（/）来换行。
   - 例如，你可以输入这样的命令：
 
@@ -43,18 +38,16 @@ export interface Config {
 
 export const Config: Schema<Config> = Schema.object({});
 
-const width = 296
-const height = 256
-
 const logger = new Logger(name)
 
 export function apply(ctx: Context) {
 
-  const instanceDir = ctx.baseDir
+  const dependencyPjskDir = path.join(__dirname, '..', 'pjsk')
+  const pluginDataDir = path.join(ctx.baseDir, 'data', 'pjsk')
 
   // 将资源文件存到data目录下
-  fs.cp(path.join(__dirname, '..', 'pjsk'),
-    path.join(instanceDir, 'data', 'pjsk'),
+  fs.cp(dependencyPjskDir,
+    pluginDataDir,
     {recursive: true},
     (err) => {
       if (err) {
@@ -64,7 +57,7 @@ export function apply(ctx: Context) {
 
   // 注册字体
   // registerFont('./pjsk/fonts/FOT-Yuruka Std.otf', { family: 'FOT-Yuruka Std UB' });
-  registerFont(path.join(__dirname, '..', 'pjsk', 'fonts', 'ShangShouFangTangTi-2.ttf'), {family: '上首方糖体'});
+  registerFont(path.join(pluginDataDir, 'fonts', 'ShangShouFangTangTi-2.ttf'), {family: '上首方糖体'});
 
   ctx.command('pjsk', '查看pjsk表情包生成帮助')
     .action(async ({session}) => {
@@ -72,58 +65,70 @@ export function apply(ctx: Context) {
     })
 
   // 定义一个命令“pjsk”，接受一个名为“inputText”的文本参数，用于绘制图像
+  const width = 296
+  const height = 256
+
   ctx.command('pjsk.draw [inputText:text]', '绘制')
-    // 定义命令的选项
     .option('number', '-n [number:number] 表情包ID', {fallback: 49})
     .option('positionY', '-y [positionY:number] 文本的垂直位置', {fallback: 0})
     .option('positionX', '-x [positionX:number] 文本的水平位置', {fallback: 0})
     .option('rotate', '-r [rotate:number] 文本的旋转角度', {fallback: 0})
     .option('fontSize', '-s [fontSize:number] 文本字体的大小', {fallback: 0})
     .option('curve', '-c [curve:boolean] 是否启用文本曲线', {fallback: false})
+    .option('width', '-w [width:number] 画布的宽度', { fallback: 296 })
+    .option('height', '--height [height:number] 画布的高度', { fallback: 256 })
+    .option('color', '--color [color:string] 文本的颜色', { fallback: '' }) // 新增 color 选项
     .action(async ({session, options}, inputText) => {
-      // 从options中解构出需要的变量，如果不存在就用默认值
-      const {number = 49, positionY = 0, positionX = 0, rotate = 0, fontSize = 0, curve = false} = options;
+      const {
+        number = 49,
+        positionY = 0,
+        positionX = 0,
+        rotate = 0,
+        fontSize = 0,
+        curve = false,
+        width: customWidth = 296,
+        height: customHeight = 256,
+        color = '', // 获取 color 选项的值
+      } = options;
+
       const draw = async () => {
         // 创建画布
-        const canvas = createCanvas(width, height);
+        const canvasWidth = customWidth || width;
+        const canvasHeight = customHeight || height;
+        const canvas = createCanvas(canvasWidth, canvasHeight);
         const ctx = canvas.getContext('2d');
 
         const character = number;
         const characterData = characters[character];
         const {defaultText} = characterData;
-        var {text, s, x, y, r} = defaultText;
+        let { text, s, x, y, r } = defaultText;
 
-        // 如果存在输入文本，则使用输入文本替换默认文本中的斜杠（/）
         if (inputText) {
           text = inputText.replace(/\//g, '\n');
         }
 
-        const img = await loadImage(`./pjsk/img/${characterData.img}`);
+        const img = await loadImage(path.join(pluginDataDir, 'img', characterData.img));
 
-        // 清除画布并绘制背景图像
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasWidth, canvasHeight);
 
-        // 根据默认值和画布大小进行调整，调整绘制选项
-        const adjustedFontSize = Math.max(1, Math.min(canvas.height, s + 12 + Number(fontSize)));
-        const adjustedPositionX = curve ? x + Number(positionX) : Math.max(0, Math.min(canvas.width, x + Number(positionX)));
-        const adjustedPositionY = curve ? y + Number(positionY) : Math.max(0, Math.min(canvas.height, y + Number(positionY)));
+        const adjustedFontSize = Math.max(1, Math.min(canvasHeight, s + 12 + Number(fontSize)));
+        const adjustedPositionX = curve ? x + Number(positionX) : Math.max(0, Math.min(canvasWidth, x + Number(positionX)));
+        const adjustedPositionY = curve ? y + Number(positionY) : Math.max(0, Math.min(canvasHeight, y + Number(positionY)));
         const adjustedRotate = r + Number(rotate);
 
-        // 设置字体样式和线宽
         ctx.font = `${adjustedFontSize}px 'FOT-Yuruka Std UB', '上首方糖体'`;
         ctx.lineWidth = 9;
         ctx.save();
 
-        // 根据位置进行平移和旋转
         ctx.translate(adjustedPositionX, adjustedPositionY);
         ctx.rotate(adjustedRotate / 10);
         ctx.textAlign = 'center';
         ctx.strokeStyle = 'white';
-        ctx.fillStyle = characterData.color;
+        ctx.fillStyle = isValidColor(color) ? color : characterData.color; // 判断颜色有效性并设置文本颜色
+
         const lines = text.split('/');
 
-        // 如果启用曲线选项，则绘制曲线文本
         if (curve) {
           let angle = (Math.PI * text.length) / 7;
           for (let line of lines) {
@@ -137,7 +142,6 @@ export function apply(ctx: Context) {
             }
           }
         } else {
-          // 否则，绘制普通文本
           let y = 0;
           for (let line of lines) {
             ctx.strokeText(line, 0, y);
@@ -146,20 +150,22 @@ export function apply(ctx: Context) {
           }
         }
 
-        // 将画布转换为图像缓冲区，并将其写入文件
         const buffer = canvas.toBuffer('image/png');
-        // const filePath = 'output.png';
-        // fs.writeFileSync(filePath, buffer);
-        // 将图像发送给会话
         await session.send(h.image(buffer, 'image/png'));
       };
 
       await draw();
     });
 
+  // 验证颜色有效性的函数
+  function isValidColor(color) {
+    const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    return colorRegex.test(color);
+  }
+
   ctx.command('pjsk.drawList', '绘制列表').action(async ({session}) => {
     const drawList = async () => {
-      const filePath = path.join(instanceDir, 'data', 'pjskList.png');
+      const filePath = path.join(pluginDataDir, 'pjskList.png');
       if (fs.existsSync(filePath)) {
         // 如果已存在生成的图片文件，则直接发送
         const buffer = fs.readFileSync(filePath);
@@ -168,7 +174,7 @@ export function apply(ctx: Context) {
       }
       const imageSize = 100;
       const padding = 10;
-      const maxImagesPerRow = 5; // 每行最多绘制5个图像对象
+      const maxImagesPerRow = 12; // 每行最多绘制 12 个图像对象
       const imagesPerRow = Math.min(maxImagesPerRow, characters.length);
       const rowCount = Math.ceil(characters.length / imagesPerRow);
       const canvasHeight = rowCount * (imageSize + padding) - padding;
@@ -194,7 +200,7 @@ export function apply(ctx: Context) {
         const x = col * (imageSize + padding);
         const y = row * (imageSize + padding);
 
-        const img = await loadImage(`./pjsk/img/${characterData.img}`);
+        const img = await loadImage(path.join(pluginDataDir, 'img', characterData.img));
         const imgWidth = img.width;
         const imgHeight = img.height;
 
