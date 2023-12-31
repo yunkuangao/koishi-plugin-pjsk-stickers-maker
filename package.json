@@ -15,7 +15,6 @@
     "type": "git",
     "url": "git+https://github.com/araea/koishi-plugin-pjsk-stickers-maker.git"
   },
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",

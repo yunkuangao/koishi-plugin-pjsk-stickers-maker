@@ -1,13 +1,14 @@
-import { Context, Schema, h } from 'koishi';
-import { createCanvas, loadImage, registerFont } from 'canvas';
+import {Context, Schema, h, Logger} from 'koishi';
+import {createCanvas, loadImage, registerFont} from 'canvas';
 import fs from 'fs';
+import path from 'path';
 
 export const name = 'pjsk-stickers-maker'
 export const usage = `## 🎮 使用
 
 - 下载 \`pjsk\` 压缩包
   - [蓝奏云](https://wwsy.lanzouj.com/ibOxp1je4uva)
-  - [115网盘（访问码：x2f0）](https://115.com/s/swzz2t63fn6?password=x2f0&#) 
+  - [115网盘（访问码：x2f0）](https://115.com/s/swzz2t63fn6?password=x2f0&#)
   - [天翼网盘（访问码：dg8t）](https://cloud.189.cn/web/share?code=2yIZjeYbi6v2)
   - 或者在命令行终端内输入 \`git clone https://github.com/araea/koishi-plugin-pjsk-stickers-maker\` 得到 \`pjsk\` 文件夹。
 - 在 \`Koishi\` 默认根目录下新建文件夹 \`pjsk\`。
@@ -36,38 +37,51 @@ pjsk.draw -n 1 -y 10 -x -10 -r 5 -s 2 -c true 你好/世界
 
 - \`pjsk.drawList\`：查看所有可用的表情包列表，以及每个表情包的ID。`
 
-export interface Config { }
+export interface Config {
+}
 
 export const Config: Schema<Config> = Schema.object({});
 
 const width = 296
 const height = 256
 
-
+const logger = new Logger(name)
 
 export function apply(ctx: Context) {
 
+  const instanceDir = ctx.baseDir
+
+  // 将资源文件存到data目录下
+  fs.cp(path.join(__dirname, '..', 'pjsk'),
+    path.join(instanceDir, 'data', 'pjsk'),
+    {recursive: true},
+    (err) => {
+      if (err) {
+        logger.error('复制pjsk文件夹出错:' + err.message)
+      }
+    });
+
   // 注册字体
-  registerFont('./pjsk/fonts/FOT-Yuruka Std.otf', { family: 'FOT-Yuruka Std UB' });
-  registerFont('./pjsk/fonts/ShangShouFangTangTi-2.ttf', { family: '上首方糖体' });
+  // registerFont('./pjsk/fonts/FOT-Yuruka Std.otf', { family: 'FOT-Yuruka Std UB' });
+  registerFont(path.join(__dirname, '..', 'pjsk', 'fonts', 'ShangShouFangTangTi-2.ttf'), {family: '上首方糖体'});
 
   ctx.command('pjsk', '查看pjsk表情包生成帮助')
-    .action(async ({ session }) => {
+    .action(async ({session}) => {
       await session.execute(`pjsk -h`)
     })
 
   // 定义一个命令“pjsk”，接受一个名为“inputText”的文本参数，用于绘制图像
   ctx.command('pjsk.draw [inputText:text]', '绘制')
     // 定义命令的选项
-    .option('number', '-n [number:number] 表情包ID', { fallback: 49 })
-    .option('positionY', '-y [positionY:number] 文本的垂直位置', { fallback: 0 })
-    .option('positionX', '-x [positionX:number] 文本的水平位置', { fallback: 0 })
-    .option('rotate', '-r [rotate:number] 文本的旋转角度', { fallback: 0 })
-    .option('fontSize', '-s [fontSize:number] 文本字体的大小', { fallback: 0 })
-    .option('curve', '-c [curve:boolean] 是否启用文本曲线', { fallback: false })
-    .action(async ({ session, options }, inputText) => {
+    .option('number', '-n [number:number] 表情包ID', {fallback: 49})
+    .option('positionY', '-y [positionY:number] 文本的垂直位置', {fallback: 0})
+    .option('positionX', '-x [positionX:number] 文本的水平位置', {fallback: 0})
+    .option('rotate', '-r [rotate:number] 文本的旋转角度', {fallback: 0})
+    .option('fontSize', '-s [fontSize:number] 文本字体的大小', {fallback: 0})
+    .option('curve', '-c [curve:boolean] 是否启用文本曲线', {fallback: false})
+    .action(async ({session, options}, inputText) => {
       // 从options中解构出需要的变量，如果不存在就用默认值
-      const { number = 49, positionY = 0, positionX = 0, rotate = 0, fontSize = 0, curve = false } = options;
+      const {number = 49, positionY = 0, positionX = 0, rotate = 0, fontSize = 0, curve = false} = options;
       const draw = async () => {
         // 创建画布
         const canvas = createCanvas(width, height);
@@ -75,8 +89,8 @@ export function apply(ctx: Context) {
 
         const character = number;
         const characterData = characters[character];
-        const { defaultText } = characterData;
-        var { text, s, x, y, r } = defaultText;
+        const {defaultText} = characterData;
+        var {text, s, x, y, r} = defaultText;
 
         // 如果存在输入文本，则使用输入文本替换默认文本中的斜杠（/）
         if (inputText) {
@@ -142,9 +156,9 @@ export function apply(ctx: Context) {
       await draw();
     });
 
-  ctx.command('pjsk.drawList', '绘制列表').action(async ({ session }) => {
+  ctx.command('pjsk.drawList', '绘制列表').action(async ({session}) => {
     const drawList = async () => {
-      const filePath = 'pjskList.png';
+      const filePath = path.join(instanceDir, 'data', 'pjskList.png');
       if (fs.existsSync(filePath)) {
         // 如果已存在生成的图片文件，则直接发送
         const buffer = fs.readFileSync(filePath);
